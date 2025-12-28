@@ -19,6 +19,11 @@ from pathlib import Path
 SCRIPT_DIR = Path(__file__).parent.resolve()
 VERSIONS_FILE = SCRIPT_DIR / "versions.txt"
 UNVERSIONED_FILE = SCRIPT_DIR / "unversioned.txt"
+README_FILE = SCRIPT_DIR / "README.md"
+
+# Markers for the README section
+README_START_MARKER = "<!-- VERSIONS_START -->"
+README_END_MARKER = "<!-- VERSIONS_END -->"
 ORG_NAME = "actions"
 GITHUB_API_URL = "https://api.github.com"
 
@@ -35,6 +40,38 @@ def save_unversioned(repos: set[str]) -> None:
     with open(UNVERSIONED_FILE, "w") as f:
         for repo_name in sorted(repos):
             f.write(f"{repo_name}\n")
+
+
+def update_readme(versions_content: str) -> None:
+    """Update the README.md with the latest versions in a fenced code block."""
+    if not README_FILE.exists():
+        print(f"Warning: {README_FILE} not found, skipping README update")
+        return
+
+    readme_text = README_FILE.read_text()
+
+    # Build the new section content
+    new_section = f"""{README_START_MARKER}
+## Latest versions
+
+```
+{versions_content}```
+{README_END_MARKER}"""
+
+    # Check if markers already exist
+    if README_START_MARKER in readme_text and README_END_MARKER in readme_text:
+        # Replace existing section
+        pattern = re.compile(
+            re.escape(README_START_MARKER) + r".*?" + re.escape(README_END_MARKER),
+            re.DOTALL
+        )
+        new_readme = pattern.sub(new_section, readme_text)
+    else:
+        # Append to end of file
+        new_readme = readme_text.rstrip() + "\n\n" + new_section + "\n"
+
+    README_FILE.write_text(new_readme)
+    print(f"Updated {README_FILE} with latest versions")
 
 
 def fetch_repos(org: str) -> list[dict]:
@@ -158,10 +195,17 @@ def main():
     # Sort alphabetically by repo name
     versions.sort(key=lambda x: x[0].lower())
 
+    # Build versions content
+    versions_content = "\n".join(
+        f"{ORG_NAME}/{repo_name}@{tag}" for repo_name, tag in versions
+    ) + "\n"
+
     # Write versions.txt
     with open(VERSIONS_FILE, "w") as f:
-        for repo_name, tag in versions:
-            f.write(f"{ORG_NAME}/{repo_name}@{tag}\n")
+        f.write(versions_content)
+
+    # Update README.md with the versions
+    update_readme(versions_content)
 
     # Update unversioned.txt
     save_unversioned(new_unversioned)
