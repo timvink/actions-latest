@@ -168,14 +168,14 @@ class TestGetLatestVersionTag(unittest.TestCase):
     """Tests for the get_latest_version_tag function."""
 
     def test_get_latest_version_tag(self):
-        """Test getting the latest vINTEGER tag."""
+        """Test getting the latest numeric version tag."""
         tags = ["v1", "v2", "v3", "v7.2", "v10", "v2.1.0"]
         result = fetch_versions.get_latest_version_tag(tags)
 
         self.assertEqual(result, "v10")
 
     def test_get_latest_version_tag_no_vinteger(self):
-        """Test when repo has no vINTEGER tags."""
+        """Test when repo has no numeric version tags."""
         tags = ["release-1", "beta", "v1-beta"]
         result = fetch_versions.get_latest_version_tag(tags)
 
