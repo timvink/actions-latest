@@ -47,5 +47,6 @@ actions/stale@v10
 actions/upload-artifact@v6
 actions/upload-pages-artifact@v4
 actions/upload-release-asset@v1
+astral-sh/setup-uv@v3
 ```
 <!-- VERSIONS_END -->
