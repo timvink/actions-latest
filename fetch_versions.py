@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Fetch all repos from the GitHub actions organization and their tags via the API,
-and generate a versions.txt file with the latest vINTEGER tags.
+and generate a versions.txt file with the latest numeric tags (vMAJOR or vMAJOR.MINOR[.PATCH]).
 
 No git cloning required - uses GitHub REST API only.
 
@@ -141,15 +141,16 @@ def fetch_tags(org: str, repo_name: str) -> list[str]:
 
 
 def get_latest_version_tag(tags: list[str]) -> str | None:
-    """Get the latest vINTEGER tag from a list of tags."""
-    # Filter to vINTEGER tags (e.g., v1, v2, v10)
-    version_pattern = re.compile(r"^v(\d+)$")
+    """Get the latest vNUMERIC(.NUMERIC)* tag from a list of tags."""
+    # Filter to vNUMERIC(.NUMERIC)* tags (e.g., v1, v2, v10, v7.2, v1.0.0)
+    version_pattern = re.compile(r"^v(\d+(?:\.\d+)*)$")
     version_tags = []
 
     for tag in tags:
         match = version_pattern.match(tag.strip())
         if match:
-            version_tags.append((int(match.group(1)), tag.strip()))
+            numeric_parts = tuple(int(part) for part in match.group(1).split("."))
+            version_tags.append((numeric_parts, tag.strip()))
 
     if not version_tags:
         return None
