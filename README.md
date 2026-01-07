@@ -2,7 +2,7 @@
 
 Keeping track of the latest versions of various GitHub Actions
 
-https://simonw.github.io/actions-latest/versions.txt
+https://raw.githubusercontent.com/timvink/actions-latest/refs/heads/main/versions.txt
 
 Access that URL for a list of all of the official Actions belonging to the [GitHub Actions](https://github.com/actions) organization along with their latest version tags.
 
