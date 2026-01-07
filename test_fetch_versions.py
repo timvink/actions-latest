@@ -169,14 +169,14 @@ class TestGetLatestVersionTag(unittest.TestCase):
 
     def test_get_latest_version_tag(self):
         """Test getting the latest vINTEGER tag."""
-        tags = ["v1", "v2", "v3", "v10", "v2.1.0"]
+        tags = ["v1", "v2", "v3", "v7.2", "v10", "v2.1.0"]
         result = fetch_versions.get_latest_version_tag(tags)
 
         self.assertEqual(result, "v10")
 
     def test_get_latest_version_tag_no_vinteger(self):
         """Test when repo has no vINTEGER tags."""
-        tags = ["v1.0.0", "v2.0.0", "release-1"]
+        tags = ["release-1", "beta", "v1-beta"]
         result = fetch_versions.get_latest_version_tag(tags)
 
         self.assertIsNone(result)
@@ -195,6 +195,13 @@ class TestGetLatestVersionTag(unittest.TestCase):
 
         # v10 should be latest, not v9 (which would be latest lexicographically)
         self.assertEqual(result, "v10")
+
+    def test_semver_ordering(self):
+        """Test that dotted numeric versions are handled correctly."""
+        tags = ["v7.1", "v7.2", "v6.9", "v7.2.1"]
+        result = fetch_versions.get_latest_version_tag(tags)
+
+        self.assertEqual(result, "v7.2.1")
 
 
 class TestMain(unittest.TestCase):
@@ -239,7 +246,7 @@ class TestMain(unittest.TestCase):
                 elif repo_name == "setup-node":
                     return ["v1", "v2", "v3", "v4"]
                 elif repo_name == "setup-uv":
-                    return ["v1", "v2", "v3"]
+                    return ["v1", "v2", "v3", "v7.2"]
                 else:
                     return []  # no-tags-repo has no tags
 
@@ -247,7 +254,9 @@ class TestMain(unittest.TestCase):
 
             # Mock get_latest_version_tag to return versions for some repos
             def get_tag_side_effect(tags):
-                if "v5" in tags:
+                if "v7.2" in tags:
+                    return "v7.2"
+                elif "v5" in tags:
                     return "v5"
                 elif "v4" in tags:
                     return "v4"
@@ -278,12 +287,12 @@ class TestMain(unittest.TestCase):
             self.assertEqual(len(lines), 3)
             self.assertIn("actions/setup-node@v4", lines)
             self.assertIn("actions/setup-python@v5", lines)
-            self.assertIn("astral-sh/setup-uv@v3", lines)
+            self.assertIn("astral-sh/setup-uv@v7.2", lines)
 
             # Verify alphabetical ordering (setup-node before setup-python)
             self.assertEqual(lines[0], "actions/setup-node@v4")
             self.assertEqual(lines[1], "actions/setup-python@v5")
-            self.assertEqual(lines[2], "astral-sh/setup-uv@v3")
+            self.assertEqual(lines[2], "astral-sh/setup-uv@v7.2")
 
             # Verify unversioned repos were saved
             mock_save_unversioned.assert_called_once()
@@ -350,9 +359,9 @@ class TestVersionPatternMatching(unittest.TestCase):
         """Test that valid vINTEGER tags are matched."""
         import re
 
-        pattern = re.compile(r"^v(\d+)$")
+        pattern = re.compile(r"^v(\d+(?:\.\d+)*)$")
 
-        valid_tags = ["v1", "v2", "v10", "v100", "v999"]
+        valid_tags = ["v1", "v2", "v10", "v100", "v999", "v1.0", "v2.3.4", "v7.2"]
         for tag in valid_tags:
             self.assertIsNotNone(pattern.match(tag), f"{tag} should match")
 
@@ -360,11 +369,9 @@ class TestVersionPatternMatching(unittest.TestCase):
         """Test that invalid tags are not matched."""
         import re
 
-        pattern = re.compile(r"^v(\d+)$")
+        pattern = re.compile(r"^v(\d+(?:\.\d+)*)$")
 
         invalid_tags = [
-            "v1.0",
-            "v1.0.0",
             "v1-beta",
             "1.0",
             "release-1",
@@ -373,6 +380,7 @@ class TestVersionPatternMatching(unittest.TestCase):
             "V1",  # uppercase
             " v1",  # leading space
             "v1 ",  # trailing space
+            "v1..0",
         ]
         for tag in invalid_tags:
             self.assertIsNone(pattern.match(tag), f"{tag} should not match")
