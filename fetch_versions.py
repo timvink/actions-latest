@@ -25,6 +25,7 @@ README_FILE = SCRIPT_DIR / "README.md"
 README_START_MARKER = "<!-- VERSIONS_START -->"
 README_END_MARKER = "<!-- VERSIONS_END -->"
 ORG_NAME = "actions"
+EXTERNAL_REPOS = [("astral-sh", "setup-uv")]
 GITHUB_API_URL = "https://api.github.com"
 
 
@@ -186,19 +187,36 @@ def main():
         latest_tag = get_latest_version_tag(tags)
 
         if latest_tag:
-            versions.append((repo_name, latest_tag))
+            versions.append(f"{ORG_NAME}/{repo_name}@{latest_tag}")
             print(f"{latest_tag}")
         else:
             print("no vINTEGER tag")
             new_unversioned.add(repo_name)
 
+    for org_name, repo_name in EXTERNAL_REPOS:
+        cache_key = f"{org_name}/{repo_name}"
+
+        if cache_key in unversioned:
+            print(f"Skipping {org_name}/{repo_name} (cached as unversioned)")
+            new_unversioned.add(cache_key)
+            continue
+
+        print(f"Fetching tags for {org_name}/{repo_name}...", end=" ")
+        tags = fetch_tags(org_name, repo_name)
+        latest_tag = get_latest_version_tag(tags)
+
+        if latest_tag:
+            versions.append(f"{org_name}/{repo_name}@{latest_tag}")
+            print(f"{latest_tag}")
+        else:
+            print("no vINTEGER tag")
+            new_unversioned.add(cache_key)
+
     # Sort alphabetically by repo name
-    versions.sort(key=lambda x: x[0].lower())
+    versions.sort(key=str.lower)
 
     # Build versions content
-    versions_content = "\n".join(
-        f"{ORG_NAME}/{repo_name}@{tag}" for repo_name, tag in versions
-    ) + "\n"
+    versions_content = "\n".join(versions) + "\n"
 
     # Write versions.txt
     with open(VERSIONS_FILE, "w") as f:

@@ -238,6 +238,8 @@ class TestMain(unittest.TestCase):
                     return ["v1", "v2", "v5"]
                 elif repo_name == "setup-node":
                     return ["v1", "v2", "v3", "v4"]
+                elif repo_name == "setup-uv":
+                    return ["v1", "v2", "v3"]
                 else:
                     return []  # no-tags-repo has no tags
 
@@ -249,6 +251,8 @@ class TestMain(unittest.TestCase):
                     return "v5"
                 elif "v4" in tags:
                     return "v4"
+                elif "v3" in tags:
+                    return "v3"
                 else:
                     return None
 
@@ -262,20 +266,24 @@ class TestMain(unittest.TestCase):
                     return original_open(versions_file, *args, **kwargs)
                 return original_open(path, *args, **kwargs)
 
-            with patch("builtins.open", side_effect=patched_open):
-                fetch_versions.main()
+            with patch.object(fetch_versions, "EXTERNAL_REPOS", [("astral-sh", "setup-uv")]):
+                with patch("fetch_versions.update_readme"):
+                    with patch("builtins.open", side_effect=patched_open):
+                        fetch_versions.main()
 
             # Verify the versions file was written correctly
             content = versions_file.read_text()
             lines = content.strip().split("\n")
 
-            self.assertEqual(len(lines), 2)
+            self.assertEqual(len(lines), 3)
             self.assertIn("actions/setup-node@v4", lines)
             self.assertIn("actions/setup-python@v5", lines)
+            self.assertIn("astral-sh/setup-uv@v3", lines)
 
             # Verify alphabetical ordering (setup-node before setup-python)
             self.assertEqual(lines[0], "actions/setup-node@v4")
             self.assertEqual(lines[1], "actions/setup-python@v5")
+            self.assertEqual(lines[2], "astral-sh/setup-uv@v3")
 
             # Verify unversioned repos were saved
             mock_save_unversioned.assert_called_once()
@@ -325,8 +333,10 @@ class TestMain(unittest.TestCase):
                     return original_open(versions_file, *args, **kwargs)
                 return original_open(path, *args, **kwargs)
 
-            with patch("builtins.open", side_effect=patched_open):
-                fetch_versions.main()
+            with patch.object(fetch_versions, "EXTERNAL_REPOS", []):
+                with patch("fetch_versions.update_readme"):
+                    with patch("builtins.open", side_effect=patched_open):
+                        fetch_versions.main()
 
             # fetch_tags should only be called once (for setup-python, not cached-no-tags)
             self.assertEqual(mock_fetch_tags.call_count, 1)
