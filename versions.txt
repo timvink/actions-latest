@@ -26,7 +26,7 @@ actions/setup-elixir@v1.5.0
 actions/setup-go@v6.2.0
 actions/setup-haskell@v1.1.4
 actions/setup-java@v5.1.0
-actions/setup-node@v6.1.0
+actions/setup-node@v6.2.0
 actions/setup-python@v6.1.0
 actions/setup-ruby@v1.1.3
 actions/stale@v10.1.1
