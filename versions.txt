@@ -3,7 +3,7 @@ actions/ai-inference@v2.0.4
 actions/attest-build-provenance@v3.1.0
 actions/attest-sbom@v3.0.0
 actions/attest@v3.1.0
-actions/cache@v5.0.1
+actions/cache@v5.0.2
 actions/checkout@v6.0.2
 actions/configure-pages@v5.0.0
 actions/create-github-app-token@v2.2.1
