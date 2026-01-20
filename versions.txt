@@ -34,3 +34,4 @@ actions/upload-artifact@v6.0.0
 actions/upload-pages-artifact@v4.0.0
 actions/upload-release-asset@v1.0.2
 astral-sh/setup-uv@v7.2.0
+oven-sh/setup-bun@v2.1.2
