@@ -247,6 +247,8 @@ class TestMain(unittest.TestCase):
                     return ["v1", "v2", "v3", "v4"]
                 elif repo_name == "setup-uv":
                     return ["v1", "v2", "v3", "v7.2"]
+                elif repo_name == "setup-bun":
+                    return ["v1", "v2", "v2.1.2"]
                 else:
                     return []  # no-tags-repo has no tags
 
@@ -262,6 +264,8 @@ class TestMain(unittest.TestCase):
                     return "v4"
                 elif "v3" in tags:
                     return "v3"
+                elif "v2.1.2" in tags:
+                    return "v2.1.2"
                 else:
                     return None
 
@@ -275,7 +279,7 @@ class TestMain(unittest.TestCase):
                     return original_open(versions_file, *args, **kwargs)
                 return original_open(path, *args, **kwargs)
 
-            with patch.object(fetch_versions, "EXTERNAL_REPOS", [("astral-sh", "setup-uv")]):
+            with patch.object(fetch_versions, "EXTERNAL_REPOS", [("astral-sh", "setup-uv"), ("oven-sh", "setup-bun")]):
                 with patch("fetch_versions.update_readme"):
                     with patch("builtins.open", side_effect=patched_open):
                         fetch_versions.main()
@@ -284,15 +288,17 @@ class TestMain(unittest.TestCase):
             content = versions_file.read_text()
             lines = content.strip().split("\n")
 
-            self.assertEqual(len(lines), 3)
+            self.assertEqual(len(lines), 4)
             self.assertIn("actions/setup-node@v4", lines)
             self.assertIn("actions/setup-python@v5", lines)
             self.assertIn("astral-sh/setup-uv@v7.2", lines)
+            self.assertIn("oven-sh/setup-bun@v2.1.2", lines)
 
             # Verify alphabetical ordering (setup-node before setup-python)
             self.assertEqual(lines[0], "actions/setup-node@v4")
             self.assertEqual(lines[1], "actions/setup-python@v5")
             self.assertEqual(lines[2], "astral-sh/setup-uv@v7.2")
+            self.assertEqual(lines[3], "oven-sh/setup-bun@v2.1.2")
 
             # Verify unversioned repos were saved
             mock_save_unversioned.assert_called_once()

@@ -48,5 +48,6 @@ actions/upload-artifact@v6
 actions/upload-pages-artifact@v4
 actions/upload-release-asset@v1
 astral-sh/setup-uv@v7.2
+oven-sh/setup-bun@v2.1.2
 ```
 <!-- VERSIONS_END -->

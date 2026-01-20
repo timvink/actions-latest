@@ -25,7 +25,7 @@ README_FILE = SCRIPT_DIR / "README.md"
 README_START_MARKER = "<!-- VERSIONS_START -->"
 README_END_MARKER = "<!-- VERSIONS_END -->"
 ORG_NAME = "actions"
-EXTERNAL_REPOS = [("astral-sh", "setup-uv")]
+EXTERNAL_REPOS = [("astral-sh", "setup-uv"), ("oven-sh", "setup-bun")]
 GITHUB_API_URL = "https://api.github.com"
 
 
