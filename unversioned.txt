@@ -2,8 +2,11 @@
 action-versions
 actions-runner-controller
 add-to-project
+ai-inference
 alpine_nodejs
 anno-test
+astral-sh/setup-uv
+attest-sbom
 boost-versions
 buildtypes
 component-detection-dependency-submission-action
@@ -26,6 +29,7 @@ languageservices
 maven-dependency-submission-action
 node-versions
 opensearch-pyd
+oven-sh/setup-bun
 partner-runner-images
 publish-action
 python-versions
