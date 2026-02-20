@@ -7,7 +7,7 @@ actions/configure-pages@v5.0.0
 actions/create-github-app-token@v2.2.1
 actions/create-release@v1.1.4
 actions/delete-package-versions@v5.0.0
-actions/dependency-review-action@v4.8.2
+actions/dependency-review-action@v4.8.3
 actions/deploy-pages@v4.0.5
 actions/download-artifact@v7.0.0
 actions/first-interaction@v3.1.0
